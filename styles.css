@@ -1,59 +1,110 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #3288dd;
-    margin: 0;
-    padding: 20px;
+// Strategy Interface (DiscountStrategy)
+class DiscountStrategy {
+    applyDiscount(amount) {
+        throw new Error("This method must be overridden");
+    }
 }
 
-.container {
-    max-width: 400px;
-    margin: auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+// Concrete Strategy for PWD Customers
+class PWDDiscount extends DiscountStrategy {
+    applyDiscount(amount) {
+        return amount * 0.80; // 20% discount for PWD customers
+    }
 }
 
-h1 {
-    text-align: center;
+// Concrete Strategy for Senior Citizens
+class SeniorDiscount extends DiscountStrategy {
+    applyDiscount(amount) {
+        return amount * 0.80; // 20% discount for Senior Citizens
+    }
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
+// Concrete Strategy for Students
+class StudentDiscount extends DiscountStrategy {
+    applyDiscount(amount) {
+        return amount * 0.90; // 10% discount for students
+    }
 }
 
-label {
-    margin-bottom: 5px;
-    font-weight: bold;
+// Concrete Strategy for 20% Discount
+class TwentyDiscount extends DiscountStrategy {
+    applyDiscount(amount) {
+        return amount * 0.80; // 20% discount
+    }
 }
 
-input, select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+// Context Class (Discount Calculator)
+class DiscountContext {
+    constructor(strategy) {
+        this.strategy = strategy;
+    }
+
+    setStrategy(strategy) {
+        this.strategy = strategy;
+    }
+
+    executeStrategy(amount) {
+        return this.strategy.applyDiscount(amount);
+    }
 }
 
-button {
-    margin-top: 15px;
-    padding: 10px;
-    width: 100%;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+// Function to calculate discount based on user type
+function calculateDiscount() {
+    const amount = parseFloat(document.getElementById("amount").value);
+    
+    // Validate if amount is provided
+    if (isNaN(amount) || amount <= 0) {
+        showModal("Please enter a valid amount first.");
+        return; // Exit the function if the amount is invalid
+    }
+
+    const userType = document.getElementById("userType").value;
+    let strategy;
+
+    switch (userType) {
+        case "PWD":
+            strategy = new PWDDiscount();
+            break;
+        case "Senior":
+            strategy = new SeniorDiscount();
+            break;
+        case "student":
+            strategy = new StudentDiscount();
+            break;
+        case "20%":
+            strategy = new TwentyDiscount();
+            break;
+        default:
+            showModal("Invalid user type selected.");
+            return; // Exit if the user type is invalid
+    }
+
+    const context = new DiscountContext(strategy);
+    const discountedAmount = context.executeStrategy(amount);
+    document.getElementById("result").innerText = `Final Amount: ₱${discountedAmount.toFixed(2)}`;
 }
 
-button:hover {
-    background-color: #0056b3;
+// Function to show modal
+function showModal(message) {
+    document.getElementById("modalMessage").innerText = message;
+    document.getElementById("modal").style.display = "block";
 }
 
-#result {
-    margin-top: 20px;
-    text-align: center;
-    font-weight: bold;
+// Function to close the modal
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+
+// Event listener for the calculate button
+document.getElementById("calculateBtn").addEventListener("click", calculateDiscount);
+
+// Event listener for closing the modal
+document.getElementById("closeModal").addEventListener("click", closeModal);
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById("modal");
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
 }
